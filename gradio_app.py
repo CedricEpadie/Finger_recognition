@@ -1,8 +1,9 @@
 import gradio as gr
 import torch
 import json, os
-import uuid
 import numpy as np
+import torch
+import torch.nn.functional as F
 
 from model import SiameseNetwork
 from PIL import Image
@@ -72,7 +73,7 @@ def recognize(image_np):
     results = []
     for user in users:
         db_emb = np.array(user["embedding"])
-        dist = np.linalg.norm(input_emb - db_emb, ord=2)
+        dist = F.pairwise_distance(torch.from_numpy(input_emb), torch.from_numpy(db_emb)).item()
         results.append((user["name"], user["matricule"], user["email"], round(dist, 4)))
 
     if not results:
@@ -80,7 +81,7 @@ def recognize(image_np):
 
     results.sort(key=lambda x: x[3])  # trie par distance
     best = results[0]
-    if best[3] < 0.5:
+    if best[3] < 0.7:
         return f"✅ Empreinte reconnue : {best[0]} (Matricule : {best[1]}, Email : {best[2]}) - Distance : {best[3]}"
     else:
         return f"❌ Aucune correspondance trouvée. Distance minimale : {best[3]}"
