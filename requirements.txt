@@ -1,0 +1,7 @@
+gradio==4.27.0
+torch>=1.12
+torchvision
+numpy
+opencv-python
+Pillow
+joblib
